@@ -1,0 +1,116 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+dist-ssr/
+build/
+.next/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Vite cache
+.vite/
+
+# Parcel cache
+.cache/
+.parcel-cache/
+
+# Temporary folders
+tmp/
+temp/
+
+# Test results
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Storybook build outputs
+.out/
+.storybook-out/
+storybook-static/
+
+# IDE files
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Local development
+.local/
+
+# Bundle analyzer
+bundle-analyzer-report.html
+stats.html
+
+# Backup files
+*.backup
+*.bak
+*.tmp
+
+# Package manager lock files (keep package-lock.json)
+yarn.lock
+pnpm-lock.yaml
+
+# Build artifacts
+*.tgz
+*.tar.gz
+
+# Service worker
+sw.js
+workbox-*.js
+
+# PWA
+manifest.json.backup

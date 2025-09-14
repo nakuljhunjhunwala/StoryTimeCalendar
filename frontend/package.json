@@ -1,0 +1,103 @@
+{
+  "name": "storytime-calendar-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Modern React frontend for StoryTime Calendar - Transform your calendar events into engaging AI-powered stories with beautiful UI and seamless integrations.",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc -b && vite build",
+    "start": "npm run preview",
+    "preview": "vite preview --host",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "quality": "npm run type-check && npm run lint:fix && npm run format && npm run build && echo '✅ Frontend quality check completed!'",
+    "quality:check": "npm run type-check && npm run lint && npm run format:check && npm run build && echo '✅ Frontend quality check completed!'",
+    "analyze": "npx vite-bundle-analyzer dist/stats.html",
+    "clean": "rm -rf dist node_modules/.vite",
+    "docker:build": "docker build -t storytime-calendar-frontend .",
+    "docker:run": "docker run -p 3000:80 storytime-calendar-frontend"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "vite",
+    "tailwindcss",
+    "calendar",
+    "ai",
+    "storytelling",
+    "frontend",
+    "spa",
+    "oauth",
+    "slack",
+    "google-calendar",
+    "responsive",
+    "modern-ui"
+  ],
+  "author": {
+    "name": "Nakul Jhunjhunwala",
+    "email": "nakul@example.com",
+    "url": "https://github.com/nakuljhunjhunwala"
+  },
+  "contributors": [
+    {
+      "name": "Nakul Jhunjhunwala",
+      "email": "nakul@example.com",
+      "role": "Lead Frontend Developer"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nakuljhunjhunwala/storytime-calendar-frontend.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nakuljhunjhunwala/storytime-calendar-frontend/issues"
+  },
+  "homepage": "https://github.com/nakuljhunjhunwala/storytime-calendar-frontend#readme",
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.1",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@tanstack/react-query": "^5.87.4",
+    "axios": "^1.11.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "lucide-react": "^0.543.0",
+    "postcss": "^8.5",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-hook-form": "^7.62.0",
+    "react-router-dom": "^7.8.2",
+    "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^3.4.17",
+    "zod": "^4.1.7",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@tailwindcss/postcss": "^4.1.13",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2"
+  }
+}

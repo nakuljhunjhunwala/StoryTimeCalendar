@@ -1,0 +1,127 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: storytime-postgres
+    environment:
+      POSTGRES_DB: storytime_calendar
+      POSTGRES_USER: storytime
+      POSTGRES_PASSWORD: storytime_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/src/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storytime -d storytime_calendar"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - storytime-network
+
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: storytime-backend
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://storytime:storytime_password@postgres:5432/storytime_calendar
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      ENCRYPTION_KEY: your-64-character-hex-encryption-key-change-in-production
+      FRONTEND_URL: http://localhost:3000
+      PORT: 5004
+    ports:
+      - "5004:5004"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/.env:/app/.env:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5004/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - storytime-network
+    restart: unless-stopped
+
+  # Frontend Web Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: storytime-frontend
+    environment:
+      NODE_ENV: production
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./frontend/.env.local:/app/.env.local:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - storytime-network
+    restart: unless-stopped
+
+  # Redis Cache (Optional - for future caching needs)
+  redis:
+    image: redis:7-alpine
+    container_name: storytime-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - storytime-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy (Optional - for production)
+  nginx:
+    image: nginx:alpine
+    container_name: storytime-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - storytime-network
+    restart: unless-stopped
+    profiles:
+      - production
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  storytime-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

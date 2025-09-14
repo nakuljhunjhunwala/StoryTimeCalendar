@@ -1,0 +1,285 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Theme {
+  FANTASY
+  GENZ
+  MEME
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  PREFER_NOT_TO_SAY
+}
+
+enum CalendarProvider {
+  GOOGLE
+  MICROSOFT
+  OUTLOOK
+  APPLE
+  CALDAV
+}
+
+enum AIProvider {
+  GEMINI
+  OPENAI
+  CLAUDE
+  LLAMA
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+  EXPIRED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  CANCELLED
+}
+
+enum EventStatus {
+  ACTIVE
+  CANCELLED
+  RESCHEDULED
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String   // Hashed password for authentication
+  name              String?
+  age               Int?
+  gender            Gender?
+  
+  // AI Settings (single provider per user)
+  aiApiKey          String?
+  aiProvider        AIProvider @default(GEMINI)
+  aiModel           String?    // "gpt-4", "gemini-pro"
+  
+  // Preferences
+  selectedTheme     Theme      @default(FANTASY)
+  timezone          String     @default("UTC")
+  notificationMinutes Int      @default(15)
+  isActive          Boolean    @default(true)
+  
+  // Timestamps
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  lastSyncAt        DateTime?
+  
+  @@map("users")
+}
+
+// Generic notification channels (Slack, Teams, Email, Push, etc.)
+model NotificationChannel {
+  id                String   @id @default(cuid())
+  userId            String   // Plain text reference to users.id
+  
+  // Channel Details
+  type              String   // "slack", "teams", "email", "push", "webhook"
+  identifier        String   // channel_id, email, device_token, webhook_url
+  name              String?  // User-friendly name "Work Slack", "Personal Email"
+  
+  // Settings
+  isActive          Boolean  @default(true)
+  isPrimary         Boolean  @default(false)
+  
+  // Metadata (flexible JSON for channel-specific data)
+  metadata          Json?    // {team_id, workspace, etc.}
+  
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("notification_channels")
+  @@index([userId])
+  @@index([type])
+  @@index([isActive])
+}
+
+// Calendar provider integrations
+model CalendarIntegration {
+  id                String            @id @default(cuid())
+  userId            String            // Plain text reference to users.id
+  provider          CalendarProvider
+  
+  // Auth tokens
+  accessToken       String?
+  refreshToken      String?
+  tokenExpiry       DateTime?
+  
+  // Status
+  status            IntegrationStatus @default(ACTIVE)
+  lastSyncAt        DateTime?
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("calendar_integrations")
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([status])
+}
+
+// Individual calendars
+model Calendar {
+  id                String   @id @default(cuid())
+  userId            String   // Plain text reference to users.id
+  integrationId     String   // Plain text reference to calendar_integrations.id
+  
+  // Calendar basics
+  providerCalendarId String
+  name              String
+  timezone          String
+  isPrimary         Boolean  @default(false)
+  
+  // Sync control
+  isActive          Boolean  @default(true)
+  lastSyncAt        DateTime?
+  
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("calendars")
+  @@unique([integrationId, providerCalendarId])
+  @@index([userId])
+  @@index([integrationId])
+  @@index([isActive])
+}
+
+// Events (minimal data for reminders)
+model Event {
+  id                String      @id @default(cuid())
+  userId            String      // Plain text reference to users.id
+  calendarId        String      // Plain text reference to calendars.id
+  
+  // Event essentials
+  providerEventId   String
+  title             String
+  description       String?
+  
+  // Timing (core for reminders)
+  startTime         DateTime
+  endTime           DateTime
+  isAllDay          Boolean     @default(false)
+  
+  // Basic details
+  location          String?
+  meetingLink       String?
+  attendeeCount     Int?        // Just count, not full details
+  
+  // Status
+  status            EventStatus @default(ACTIVE)
+  
+  // Sync tracking
+  lastUpdatedAt     DateTime
+  dataHash          String?     // For change detection
+  
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  @@map("events")
+  @@unique([calendarId, providerEventId])
+  @@index([userId])
+  @@index([calendarId])
+  @@index([startTime])
+  @@index([status])
+}
+
+// AI-generated storylines
+model Storyline {
+  id                String   @id @default(cuid())
+  userId            String   // Plain text reference to users.id
+  eventId           String   // Plain text reference to events.id
+  
+  // Generated content
+  theme             Theme
+  storyText         String   // 2-3 line narrative
+  plainText         String   // Fallback
+  emoji             String?
+  
+  // Generation tracking
+  aiProvider        AIProvider?
+  tokensUsed        Int?
+  
+  // Cache control
+  isActive          Boolean  @default(true)
+  expiresAt         DateTime
+  
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@map("storylines")
+  @@unique([eventId, theme])
+  @@index([userId])
+  @@index([eventId])
+  @@index([expiresAt])
+}
+
+// Notification delivery logs
+model NotificationLog {
+  id                String            @id @default(cuid())
+  userId            String            // Plain text reference to users.id
+  eventId           String            // Plain text reference to events.id
+  storylineId       String?           // Plain text reference to storylines.id
+  channelId         String?           // Plain text reference to notification_channels.id
+  
+  // Scheduling
+  scheduledFor      DateTime
+  sentAt            DateTime?
+  status            NotificationStatus @default(PENDING)
+  
+  // Content
+  messageText       String
+  
+  // Error handling
+  errorMessage      String?
+  retryCount        Int               @default(0)
+  
+  // Timestamps
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@map("notification_logs")
+  @@index([userId])
+  @@index([eventId])
+  @@index([scheduledFor])
+  @@index([status])
+}
+
+// Simple sync tracking
+model SyncJob {
+  id                String   @id @default(cuid())
+  userId            String?  // Plain text reference to users.id (null for global jobs)
+  
+  jobType           String   // "daily_sync", "manual_sync"
+  status            String   // "running", "completed", "failed"
+  eventsProcessed   Int      @default(0)
+  
+  startedAt         DateTime @default(now())
+  completedAt       DateTime?
+  
+  @@map("sync_jobs")
+  @@index([userId])
+  @@index([status])
+  @@index([startedAt])
+}
