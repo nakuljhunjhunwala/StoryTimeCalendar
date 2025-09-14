@@ -452,8 +452,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Nakul Jhunjhunwala**
 - GitHub: [@nakuljhunjhunwala](https://github.com/nakuljhunjhunwala)
-- Email: nakul@example.com
-- LinkedIn: [Nakul Jhunjhunwala](https://linkedin.com/in/nakuljhunjhunwala)
+- Email: jhunjhunwalanakul@gmail.com
+- LinkedIn: [Nakul Jhunjhunwala](https://linkedin.com/in/nakuljjw)
 
 ## 🙏 Acknowledgments
 
